@@ -4,7 +4,7 @@ this is a simple SQL db which i built it for fun, the core for RadwanSQL is Bina
 ## Installation
 
 ```
-
+git clone https://github.com/RadwanHegazy/radwansql
 ```
 
 ## Main Parts of RadwanSQL : 
