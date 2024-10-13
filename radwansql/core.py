@@ -1,6 +1,7 @@
 """
     Binary search tree data strcutre write here
 """
+import pickle, os
 
 class Metadata: 
 
@@ -9,15 +10,47 @@ class Metadata:
         self.tid_max = tid_max
 
 
+    def write_data(self, data) :
+        with open(self.db_name, 'wb') as p_file :
+            pickle.dump(data, p_file)
+    
+    def flush(self) : 
+        os.remove(self.db_name)
+        
+    def read_data(self) : 
+        try : 
+            with open(self.db_name, 'rb') as p_file : 
+                data = pickle.load(p_file)
+        except FileNotFoundError:
+            data = []
+        return data
+
 class Tree:
     meta = Metadata()
 
-    def __init__(self, data, tid=1) -> None:
+    def __init__(self, data=[], tid=1) -> None:
         self.data = data
         self.tid = tid
         self.left = None
         self.right = None
 
+    def represent_data (self, data):
+        output = None
+        if type(data) == list:
+            output = []
+            for i in data:
+                output.append({
+                '_tid' : self.tid,
+                **i
+            })
+                
+        elif type(data) == dict:
+            output = {
+                '_tid' : self.tid,
+                **data
+            }
+        return output
+    
     def add_child(self, data) :     
         tid = self.meta.tid_max - self.tid
         
@@ -37,7 +70,7 @@ class Tree:
                 
     def get_all_childs (self) :
         elements = []
-        elements.append(self.data)
+        elements.append(self.represent_data(self.data))
 
         if self.left : 
             elements += self.left.get_all_childs()
@@ -48,7 +81,7 @@ class Tree:
 
         return elements
     
-    def retrive_child(self, tid) :
+    def retrive_child_object(self, tid) :
         if tid == self.tid:
             return self
 
@@ -58,10 +91,23 @@ class Tree:
         if self.right:
             return self.right.retrive_child(tid)
     
-    def update_child(self, tid, data):
-        child = self.retrive_child(tid)
+    def retrive_child(self, tid) :
+        if tid == self.tid:
+            return self.represent_data(self.data)
+
+        if self.left:
+            return self.left.retrive_child(tid)
+
+        if self.right:
+            return self.right.retrive_child(tid)
+    
+    def update_child(self, tid, **data):
+        child = self.retrive_child_object(tid)
         if child:
-            child.data = data
+            original_data = child.data
+            for k, v in data.items() :
+                original_data[k] = v
+            child.data = original_data
             return child
         
     def find_maximum(self) : 
@@ -93,15 +139,3 @@ class Tree:
             self.data = min_larger_node.data
             self.tid = min_larger_node.tid  
             self.right = self.right.delete(min_larger_node.tid)
-
-    
-if __name__ == "__main__" : 
-    tree = Tree({"name":"radwan"})
-    tree.add_child(data={"name":"ibrahim"})
-    tree.add_child(data={"name":"Khaled"})
-
-    print(tree.retrive_child(1).data)
-    new_tree = tree.update_child(1, {"name":"radwan", "age":19})
-    print(new_tree.get_all_childs())
-    new_tree = tree.delete(1)
-    print(new_tree.get_all_childs())
