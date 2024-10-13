@@ -1,3 +1,7 @@
+<img src="images/radwansql.png">
+
+<br>
+
 # RadwanSQL
 this is a simple SQL db which i built it for fun, the core for RadwanSQL is Binary Search Tree (BST)
 
@@ -63,6 +67,12 @@ user.get(1).delete()
 
 # fetch all users
 print("All users after deleteing user with tid 1: ", user.all())
+
+# export all users as json file
+user.export_as_json("users")
+
+# export specific user 
+user.get(2).export_as_json("my_user")
 
 ```
 
