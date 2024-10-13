@@ -1,7 +1,7 @@
 """
     Binary search tree data strcutre write here
 """
-import json
+import pickle, os
 
 class Metadata: 
 
@@ -10,22 +10,46 @@ class Metadata:
         self.tid_max = tid_max
 
 
+    def write_data(self, data) :
+        with open(self.db_name, 'wb') as p_file :
+            pickle.dump(data, p_file)
+    
+    def flush(self) : 
+        os.remove(self.db_name)
+        
+    def read_data(self) : 
+        try : 
+            with open(self.db_name, 'rb') as p_file : 
+                data = pickle.load(p_file)
+        except FileNotFoundError:
+            data = []
+        return data
+
 class Tree:
     meta = Metadata()
 
-    def __init__(self, data, tid=1) -> None:
+    def __init__(self, data=[], tid=1) -> None:
         self.data = data
         self.tid = tid
         self.left = None
         self.right = None
-        
 
-    def represent_data (self, data:dict):
-        data = {
-            '_tid' : self.tid,
-            **data
-        }
-        return data
+    def represent_data (self, data):
+        output = None
+        if type(data) == list:
+            output = []
+            for i in data:
+                output.append({
+                '_tid' : self.tid,
+                **i
+            })
+                
+        elif type(data) == dict:
+            output = {
+                '_tid' : self.tid,
+                **data
+            }
+        return output
     
     def add_child(self, data) :     
         tid = self.meta.tid_max - self.tid
@@ -115,4 +139,3 @@ class Tree:
             self.data = min_larger_node.data
             self.tid = min_larger_node.tid  
             self.right = self.right.delete(min_larger_node.tid)
-
