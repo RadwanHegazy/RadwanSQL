@@ -1,6 +1,7 @@
 """
     Binary search tree data strcutre write here
 """
+import json
 
 class Metadata: 
 
@@ -17,7 +18,15 @@ class Tree:
         self.tid = tid
         self.left = None
         self.right = None
+        
 
+    def represent_data (self, data:dict):
+        data = {
+            '_tid' : self.tid,
+            **data
+        }
+        return data
+    
     def add_child(self, data) :     
         tid = self.meta.tid_max - self.tid
         
@@ -37,7 +46,7 @@ class Tree:
                 
     def get_all_childs (self) :
         elements = []
-        elements.append(self.data)
+        elements.append(self.represent_data(self.data))
 
         if self.left : 
             elements += self.left.get_all_childs()
@@ -48,7 +57,7 @@ class Tree:
 
         return elements
     
-    def retrive_child(self, tid) :
+    def retrive_child_object(self, tid) :
         if tid == self.tid:
             return self
 
@@ -58,10 +67,23 @@ class Tree:
         if self.right:
             return self.right.retrive_child(tid)
     
-    def update_child(self, tid, data):
-        child = self.retrive_child(tid)
+    def retrive_child(self, tid) :
+        if tid == self.tid:
+            return self.represent_data(self.data)
+
+        if self.left:
+            return self.left.retrive_child(tid)
+
+        if self.right:
+            return self.right.retrive_child(tid)
+    
+    def update_child(self, tid, **data):
+        child = self.retrive_child_object(tid)
         if child:
-            child.data = data
+            original_data = child.data
+            for k, v in data.items() :
+                original_data[k] = v
+            child.data = original_data
             return child
         
     def find_maximum(self) : 
@@ -94,14 +116,3 @@ class Tree:
             self.tid = min_larger_node.tid  
             self.right = self.right.delete(min_larger_node.tid)
 
-    
-if __name__ == "__main__" : 
-    tree = Tree({"name":"radwan"})
-    tree.add_child(data={"name":"ibrahim"})
-    tree.add_child(data={"name":"Khaled"})
-
-    print(tree.retrive_child(1).data)
-    new_tree = tree.update_child(1, {"name":"radwan", "age":19})
-    print(new_tree.get_all_childs())
-    new_tree = tree.delete(1)
-    print(new_tree.get_all_childs())
